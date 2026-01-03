@@ -1,4 +1,4 @@
-# Multimodal Property Price Predictor
+# Multimodal House Price Prediction Using Satellite Imagery and Tabular Data
 This repository contains a machine learning pipeline for predicting real estate prices using a multimodal approach. The system combines traditional tabular data (house features like bedrooms, square footage, etc.) with satellite imagery of the properties to improve prediction accuracy.
 
 ## Project Overview
