@@ -17,7 +17,6 @@ This project combines traditional property features (bedrooms, square footage, l
 ```bash
 git clone https://github.com/BakaPranjal/CDC_Open_Project_2025.git
 cd property-price-predictor
-pip install -r requirements.txt
 ```
 
 **Dependencies:**
