@@ -1,151 +1,81 @@
-# CDC Open Project 2025
+### Multimodal Property Price Predictor
+This repository contains a machine learning pipeline for predicting real estate prices using a multimodal approach. The system combines traditional tabular data (house features like bedrooms, square footage, etc.) with satellite imagery of the properties to improve prediction accuracy.
 
-This repository contains the complete workflow for a multimodal machine learning project developed as part of the **CDC Open Project 2025**.  
-The project integrates **tabular data** with **satellite/map images** fetched using geographic coordinates to build and evaluate regression models.
+## Project Overview
+The project is divided into three main components:
 
----
+**Map Data Acquisition:** A script to automate the retrieval of satellite imagery based on property coordinates.
 
-## Project Workflow
+**Data Preprocessing:** A notebook for cleaning tabular data and preparing image paths for training.
 
-1. Fetch satellite images using latitude and longitude  
-2. Preprocess tabular data  
-3. Prepare multimodal datasets  
-4. Train and evaluate regression models  
+**Model Training:** A deep learning pipeline that uses a dual-input architecture (CNN for images and a Dense network for numerical data).
 
----
+## Project Structure
+**map_fetcher.py:** Python script utilizing the Mapbox API to fetch static satellite images for properties using latitude and longitude.
 
-## 1. Image Fetching (`map_fetcher.py`)
+**preprocessing.ipynb:** Jupyter notebook for data cleaning, logarithmic price transformation, and feature scaling.
 
-This script downloads satellite images using the **Mapbox Static Images API** and appends image paths to the dataset.
+**model_training.ipynb:** Jupyter notebook for building, training, and evaluating the multimodal ResNet50-based neural network and XGBoost models.
 
-### Requirements
-- A valid **Mapbox access token**
-- Internet connectivity
+## Setup Instructions
+*Prerequisites*
+Python 3.8 or higher
 
-### Setup
+A Mapbox Access Token (for image retrieval)
 
-Open `map_fetcher.py` and replace:
+A GPU is recommended for model training (TensorFlow/Keras)
 
-```python
-ACCESS_TOKEN = "your access token"
+## Installation
+Clone the repository:
+
+```
+git clone https://github.com/your-username/property-price-predictor.git
+cd property-price-predictor
 ```
 
-with your personal Mapbox access token.
+## Install the required dependencies:
+```
+pip install pandas numpy tensorflow scikit-learn matplotlib seaborn xgboost opencv-python requests
+```
+## Usage
+1. Fetching Map Data
+Before training, you must fetch the satellite images. Open map_fetcher.py and replace "your access token" with your actual Mapbox API key. Run the script to download images:
 
-### Expected Input
-
-The input CSV files must contain the following columns:
-- `lat`  — latitude  
-- `long` — longitude  
-
-### Running the Script
-
-```bash
+```
 python map_fetcher.py
 ```
+Images will be saved to the Map_Images_Test or Map_Images_Train directories by default.
 
-### What the Script Does
-- Fetches satellite images for each row in the dataset  
-- Saves images to:
-  - `Map_Images/` (training data)
-  - `Map_Images_Test/` (test data)
-- Adds an `image_path` column to the dataset  
-- Outputs:
-  - `train_with_images.csv`
-  - `test_with_images.csv`
+2. Data Preprocessing
+Run the **_preprocessing.ipynb_** notebook to:
 
----
+* Clean missing values from the dataset.
+* Apply log transformation to the price column to handle skewness.
+* Scale numerical features using StandardScaler.
+* Verify that all image_path entries correspond to downloaded files.
 
-## 2. Data Preprocessing (`preprocessing.ipynb`)
+3. Training the Model
+The **_model_training.ipynb_** notebook handles the multimodal learning process:
 
-This notebook handles:
-- Loading raw datasets  
-- Data cleaning and filtering  
-- Feature selection  
-- Scaling numeric features  
-- Preparing final inputs for model training  
+* **Image Branch:** Uses a ResNet50 backbone (pre-trained on ImageNet) for feature extraction from property images.
+* **Numerical Branch:** A fully connected neural network for tabular data features.
+* **Fusion Layer:** Concatenates both branches into a single output layer for price regression.
 
-### How to Use
+To train the model, ensure the paths to your processed CSV files are correctly set in the notebook.
 
-```bash
-jupyter notebook preprocessing.ipynb
-```
+## Model Architecture
+The deep learning model uses a late-fusion strategy:
 
-Run the notebook cells **from top to bottom**.  
-Ensure the paths to `train_with_images.csv` and `test_with_images.csv` are correctly specified.
+* **Visual Features:** Extracted via ResNet50 with Global Average Pooling.
 
-### Output
-- Cleaned and scaled tabular features  
-- Processed datasets ready for model training  
+* **Numerical Features:** Processed through multiple Dense layers with Dropout and Batch Normalization.
 
----
+_Optimization:_ Adam optimizer with Huber loss for robustness against outliers.
 
-## 3. Model Training (`model_training.ipynb`)
+## Evaluation Metrics
+The pipeline evaluates performance using:
 
-This notebook builds and trains machine learning models using:
-- Tabular features  
-- Satellite images through a CNN-based architecture (ResNet)  
-
-### Key Features
-- Multimodal learning (image + tabular)  
-- Transfer learning using pretrained ResNet  
-- Proper train–validation split  
-- Regularization and early stopping  
-- Evaluation using MAE and MSE  
-
-### How to Use
-
-```bash
-jupyter notebook model_training.ipynb
-```
-
-Run the notebook sequentially to:
-1. Load processed data  
-2. Load image datasets  
-3. Build the multimodal model  
-4. Train and validate the model  
-5. Evaluate performance  
-
----
-
-## Important Notes
-
-- Validation and test images should **not** be augmented  
-- Ensure there are **no missing values** in the `image_path` column  
-- Images act as an auxiliary modality; tabular data remains the primary signal  
-- CNN backbones are frozen initially to reduce overfitting  
-
----
-
-## Dependencies
-
-Recommended Python packages:
-
-```bash
-pip install numpy pandas matplotlib scikit-learn tensorflow requests pillow jupyter
-```
-
----
-
-## Outputs
-
-Depending on execution, the project may generate:
-- Trained models  
-- Evaluation metrics  
-- Loss curves  
-- Predictions on test data  
-
----
-
-## Common Issues
-
-- **Mapbox API errors**: Verify access token and API limits  
-- **Missing images**: Ensure image paths exist on disk  
-- **Overfitting**: Use pretrained backbones and early stopping  
-
----
-
-## Author
-
-**Pranjal (BakaPranjal)**  
-CDC Open Project 2025
+* Root Mean Squared Error (RMSE)
+* Mean Absolute Error (MAE)
+* R-squared (R2) Score
+* Mean Absolute Percentage Error (MAPE)
